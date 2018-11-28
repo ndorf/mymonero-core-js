@@ -108,21 +108,26 @@ struct Send_Task_AsyncContext
 	optional<string> step2_retVals__tx_pub_key_string;
 };
 //
-static std::unordered_map<string, Send_Task_AsyncContext *> _heap_vals_ptrs_by_task_id;
-static Send_Task_AsyncContext *_heap_vals_ptr_for(const string &task_id)
+typedef std::unordered_map<string, Send_Task_AsyncContext *> context_map;
+static context_map Send_Task_AsyncContext *> _heap_vals_ptrs_by_task_id;
+static context_map::iterator context_map_lookup(const string &task_id)
 {
-    if (_heap_vals_ptrs_by_task_id.find(task_id) == _heap_vals_ptrs_by_task_id.end()) {
+    auto found = _heap_vals_ptrs_by_task_id.find(task_id);
+    if (found == _heap_vals_ptrs_by_task_id.end()) {
 		send_app_handler__error_msg(task_id, "Code fault: no waiting heap vals container ptr found");
-		return NULL;
     }
-    return _heap_vals_ptrs_by_task_id[task_id];
+    return found;
+}
+static Send_Task_AsyncContext *_heap_vals_ptr_for(const string &task_id) {
+    auto iter = context_map_lookup(task_id);
+    return iter ? *iter : NULL;
 }
 void _delete_and_remove_heap_vals_ptr_for(const string &task_id)
 {
-	auto ptr = _heap_vals_ptr_for(task_id);
-	if (ptr != NULL) {
-		delete ptr;
-		_heap_vals_ptrs_by_task_id.erase(task_id);
+	auto iter = context_map_lookup(task_id);
+	if (iter) {
+		delete *iter;
+		_heap_vals_ptrs_by_task_id.erase(iter);
 	} else {
 		THROW_WALLET_EXCEPTION_IF(false, error::wallet_internal_error, "Expected _heap_vals_ptr_for(task_id)");
 	}
