@@ -378,9 +378,7 @@ void emscr_async_bridge::send_cb_I__got_unspent_outs(const string &args_string)
 		return;
 	}
 	THROW_WALLET_EXCEPTION_IF(ptrTo_taskAsyncContext->unspent_outs.size() != 0, error::wallet_internal_error, "Expected 0 ptrTo_taskAsyncContext->unspent_outs in cb I");
-	BOOST_FOREACH(SpendableOutput &out, *(parsed_res.unspent_outs)) {
-		ptrTo_taskAsyncContext->unspent_outs.push_back(out); // move structs from stack's vector to heap's vector
-	}
+    ptrTo_taskAsyncContext->unspent_outs = std::move(*parsed_res.unspent_outs);
 	ptrTo_taskAsyncContext->fee_per_b = *(parsed_res.per_byte_fee);
 	_reenterable_construct_and_send_tx(task_id);
 }
@@ -421,14 +419,13 @@ void emscr_async_bridge::_reenterable_construct_and_send_tx(const string &task_i
 	ptrTo_taskAsyncContext->step1_retVals__change_amount = step1_retVals.change_amount;
 	ptrTo_taskAsyncContext->step1_retVals__mixin = step1_retVals.mixin;
 	THROW_WALLET_EXCEPTION_IF(ptrTo_taskAsyncContext->step1_retVals__using_outs.size() != 0, error::wallet_internal_error, "Expected 0 using_outs");
-	BOOST_FOREACH(SpendableOutput &out, step1_retVals.using_outs) {
-		ptrTo_taskAsyncContext->step1_retVals__using_outs.push_back(out); // move structs from stack's vector to heap's vector
-	}
+    ptrTo_taskAsyncContext->step1_retVals__using_outs = std::move(step1_retVals.using_outs);
+
 	ptrTo_taskAsyncContext->valsState = WAIT_FOR_STEP2;
 	//
 	send_app_handler__status_update(task_id, fetchingDecoyOutputs);
 	//
-	auto req_params = new__req_params__get_random_outs(step1_retVals.using_outs);
+	auto req_params = new__req_params__get_random_outs(ptrTo_taskAsyncContext->step1_retVals__using_outs);
 	boost::property_tree::ptree req_params_root;
 	boost::property_tree::ptree amounts_ptree;
 	BOOST_FOREACH(const string &amount_string, req_params.amounts)
