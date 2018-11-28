@@ -120,7 +120,7 @@ static context_map::iterator context_map_lookup(const string &task_id)
 }
 static Send_Task_AsyncContext *_heap_vals_ptr_for(const string &task_id) {
     auto iter = context_map_lookup(task_id);
-    return iter ? *iter : NULL;
+    return iter ? *iter : nullptr;
 }
 void _delete_and_remove_heap_vals_ptr_for(const string &task_id)
 {
@@ -311,7 +311,7 @@ void emscr_async_bridge::send_funds(const string &args_string)
 		none // tx_pub_key_string
 	};
 	// exception will be thrown if oom but JIC, since NULL ptrs are somehow legal in WASM
-	if (ptrTo_taskAsyncContext == NULL) {
+	if (!ptrTo_taskAsyncContext) {
 		send_app_handler__error_msg(task_id, "Out of memory (heap vals container)");
 		return;
 	}
@@ -363,7 +363,7 @@ void emscr_async_bridge::send_cb_I__got_unspent_outs(const string &args_string)
 		return;
 	}
 	Send_Task_AsyncContext *ptrTo_taskAsyncContext = _heap_vals_ptr_for(task_id);
-	if (ptrTo_taskAsyncContext == NULL) { // an error will have been returned already - just bail.
+	if (!ptrTo_taskAsyncContext) { // an error will have been returned already - just bail.
 		return;
 	}
 	//
@@ -387,7 +387,7 @@ void emscr_async_bridge::send_cb_I__got_unspent_outs(const string &args_string)
 void emscr_async_bridge::_reenterable_construct_and_send_tx(const string &task_id)
 {
 	Send_Task_AsyncContext *ptrTo_taskAsyncContext = _heap_vals_ptr_for(task_id);
-	if (ptrTo_taskAsyncContext == NULL) { // an error will have been returned already - just bail.
+	if (!ptrTo_taskAsyncContext) { // an error will have been returned already - just bail.
 		return;
 	}
 	send_app_handler__status_update(task_id, calculatingFee);
@@ -470,7 +470,7 @@ void emscr_async_bridge::send_cb_II__got_random_outs(const string &args_string)
 		return;
 	}
 	Send_Task_AsyncContext *ptrTo_taskAsyncContext = _heap_vals_ptr_for(task_id);
-	if (ptrTo_taskAsyncContext == NULL) { // an error will have been returned already - just bail.
+	if (!ptrTo_taskAsyncContext) { // an error will have been returned already - just bail.
 		return;
 	}
 	auto parsed_res = new__parsed_res__get_random_outs(json_root.get_child("res"));
@@ -587,7 +587,7 @@ void emscr_async_bridge::send_cb_III__submitted_tx(const string &args_string)
 		return;
 	}
 	Send_Task_AsyncContext *ptrTo_taskAsyncContext = _heap_vals_ptr_for(task_id);
-	if (ptrTo_taskAsyncContext == NULL) { // an error will have been returned already - just bail.
+	if (!ptrTo_taskAsyncContext) { // an error will have been returned already - just bail.
 		return;
 	}
 	THROW_WALLET_EXCEPTION_IF(ptrTo_taskAsyncContext->valsState != WAIT_FOR_FINISH, error::wallet_internal_error, "Expected valsState of WAIT_FOR_FINISH"); // just for addtl safety
