@@ -108,8 +108,8 @@ struct Send_Task_AsyncContext
 	optional<string> step2_retVals__tx_pub_key_string;
 };
 //
-std::unordered_map<string, Send_Task_AsyncContext *> _heap_vals_ptrs_by_task_id;
-Send_Task_AsyncContext *_heap_vals_ptr_for(const string &task_id)
+static std::unordered_map<string, Send_Task_AsyncContext *> _heap_vals_ptrs_by_task_id;
+static Send_Task_AsyncContext *_heap_vals_ptr_for(const string &task_id)
 {
     if (_heap_vals_ptrs_by_task_id.find(task_id) == _heap_vals_ptrs_by_task_id.end()) {
 		send_app_handler__error_msg(task_id, "Code fault: no waiting heap vals container ptr found");
@@ -129,7 +129,7 @@ void _delete_and_remove_heap_vals_ptr_for(const string &task_id)
 }
 //
 // To-JS fn decls - Status updates and routine completions
-void send_app_handler__status_update(const string &task_id, SendFunds_ProcessStep code)
+static void send_app_handler__status_update(const string &task_id, SendFunds_ProcessStep code)
 {
 	boost::property_tree::ptree root;
 	root.put("code", code); // not 64bit so sendable in JSON
