@@ -109,7 +109,7 @@ struct Send_Task_AsyncContext
 };
 //
 typedef std::unordered_map<string, Send_Task_AsyncContext *> context_map;
-static context_map Send_Task_AsyncContext *> _heap_vals_ptrs_by_task_id;
+static context_map _heap_vals_ptrs_by_task_id;
 static context_map::iterator context_map_lookup(const string &task_id)
 {
     auto found = _heap_vals_ptrs_by_task_id.find(task_id);
@@ -120,13 +120,13 @@ static context_map::iterator context_map_lookup(const string &task_id)
 }
 static Send_Task_AsyncContext *_heap_vals_ptr_for(const string &task_id) {
     auto iter = context_map_lookup(task_id);
-    return iter ? *iter : nullptr;
+    return iter != _heap_vals_ptrs_by_task_id.end() ? iter->second : nullptr;
 }
-void _delete_and_remove_heap_vals_ptr_for(const string &task_id)
+static void _delete_and_remove_heap_vals_ptr_for(const string &task_id)
 {
 	auto iter = context_map_lookup(task_id);
-	if (iter) {
-		delete *iter;
+	if (iter != _heap_vals_ptrs_by_task_id.end()) {
+		delete iter->second;
 		_heap_vals_ptrs_by_task_id.erase(iter);
 	} else {
 		THROW_WALLET_EXCEPTION_IF(false, error::wallet_internal_error, "Expected _heap_vals_ptr_for(task_id)");
